@@ -16,3 +16,15 @@ class User(AbstractUser):
     REQUIRED_FIELDS = []
 
 
+class Payments(models.Model):
+    class payment_method_choices(models.TextChoices):
+        CASH = 'cash', 'Наличные'
+        TRANSFER = 'transfer', 'Перевод на счет'
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Пользователь')
+    amount = models.FloatField(verbose_name='Сумма оплаты')
+    date = models.DateTimeField(auto_now_add=True, verbose_name='Дата платежа')
+    paid_course = models.ForeignKey('lms.Course', on_delete=models.SET_NULL, verbose_name='Курс', null=True, blank=True)
+    paid_lesson = models.ForeignKey('lms.Lesson', on_delete=models.SET_NULL, verbose_name='Урок', null=True, blank=True)
+    payment_method = models.CharField(choices=payment_method_choices.choices,
+                                      verbose_name='Способ оплаты')

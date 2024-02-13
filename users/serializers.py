@@ -1,0 +1,16 @@
+from django.contrib.auth import get_user_model
+from rest_framework import serializers
+
+from users.models import Payments
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields = ['id', 'email', 'first_name', 'last_name', 'phone', 'city']
+
+
+class PaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payments
+        fields = '__all__'

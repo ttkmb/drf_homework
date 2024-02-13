@@ -3,7 +3,8 @@ from rest_framework import routers
 
 from lms.apps import LmsConfig
 from lms.views import CourseViewSet, CreateLessonApiView, ListLessonApiView, DetailLessonApiView, UpdateLessonApiView, \
-    DeleteLessonApiView, UserUpdateAPIView
+    DeleteLessonApiView
+from users.views import UserUpdateAPIView
 
 app_name = LmsConfig.name
 
