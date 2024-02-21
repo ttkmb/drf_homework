@@ -20,3 +20,9 @@ class Lesson(models.Model):
     owner = models.ForeignKey(to=get_user_model(), on_delete=models.SET_NULL, related_name='lesson', null=True,
                               blank=True, verbose_name='Владелец'
                               )
+
+
+class Subscription(models.Model):
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, verbose_name='Пользователь')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, verbose_name='Курс')
+    date_subscription = models.DateField(auto_now_add=True, verbose_name='Дата подписки')

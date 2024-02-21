@@ -1,14 +1,20 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, generics
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT
+from rest_framework.views import APIView
 
-from lms.models import Course, Lesson
-from lms.serializers import CourseSerializer, LessonSerializer
+from lms.models import Course, Lesson, Subscription
+from lms.paginators import CoursePaginator, LessonPaginator
+from lms.serializers import CourseSerializer, LessonSerializer, SubscriptionSerializer
 from users.permissions import IsModerator, IsOwner
 
 
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
+    pagination_class = CoursePaginator
 
     def get_permissions(self):
         if self.action == 'create':
@@ -44,6 +50,7 @@ class CreateLessonApiView(generics.CreateAPIView):
 class ListLessonApiView(generics.ListAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
+    pagination_class = LessonPaginator
 
     def get_queryset(self):
         return self.queryset.filter(owner=self.request.user)
@@ -58,10 +65,29 @@ class DetailLessonApiView(generics.RetrieveAPIView):
 class UpdateLessonApiView(generics.UpdateAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
-    permission_classes = [IsAuthenticated, ~IsModerator, IsOwner]
-
+    permission_classes = [IsAuthenticated]
+    # ~IsModerator, IsOwner
 
 class DeleteLessonApiView(generics.DestroyAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
+    permission_classes = [IsAuthenticated]
+    # ~IsModerator, IsOwner
+
+
+class SubscriptionApiView(APIView):
     permission_classes = [IsAuthenticated, ~IsModerator, IsOwner]
+    serializer_class = SubscriptionSerializer
+
+    def post(self, *args, **kwargs):
+        user = self.request.user
+        course_item = get_object_or_404(Course, id=kwargs.get('pk'))
+        subs_item, created = Subscription.objects.get_or_create(user=user, course=course_item)
+        if not created:
+            subs_item.delete()
+            message = 'Вы отписались от курса'
+            status = HTTP_204_NO_CONTENT
+        else:
+            message = 'Вы подписались на курс'
+            status = HTTP_201_CREATED
+        return Response({'message': message}, status=status)
