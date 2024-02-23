@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'lms',
     'django_filters',
     'rest_framework_simplejwt',
+    'phonenumber_field',
 ]
 
 MIDDLEWARE = [

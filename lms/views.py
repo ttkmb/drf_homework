@@ -65,14 +65,13 @@ class DetailLessonApiView(generics.RetrieveAPIView):
 class UpdateLessonApiView(generics.UpdateAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
-    permission_classes = [IsAuthenticated]
-    # ~IsModerator, IsOwner
+    permission_classes = [IsAuthenticated, ~IsModerator, IsOwner]
+
 
 class DeleteLessonApiView(generics.DestroyAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
-    permission_classes = [IsAuthenticated]
-    # ~IsModerator, IsOwner
+    permission_classes = [IsAuthenticated, ~IsModerator, IsOwner]
 
 
 class SubscriptionApiView(APIView):
