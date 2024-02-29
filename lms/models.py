@@ -26,3 +26,4 @@ class Subscription(models.Model):
     user = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='Пользователь')
     course = models.ForeignKey(Course, on_delete=models.CASCADE, verbose_name='Курс')
     date_subscription = models.DateField(auto_now_add=True, verbose_name='Дата подписки')
+

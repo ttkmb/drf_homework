@@ -21,10 +21,19 @@ class Payments(models.Model):
         CASH = 'cash', 'Наличные'
         TRANSFER = 'transfer', 'Перевод на счет'
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Пользователь')
-    amount = models.FloatField(verbose_name='Сумма оплаты')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Пользователь', blank=True, null=True)
+    amount = models.PositiveIntegerField(verbose_name='Сумма оплаты')
     date = models.DateTimeField(auto_now_add=True, verbose_name='Дата платежа')
-    paid_course = models.ForeignKey('lms.Course', on_delete=models.SET_NULL, verbose_name='Курс', null=True, blank=True)
+    paid_course = models.ForeignKey('lms.Course', on_delete=models.SET_NULL, verbose_name='Курс', null=True)
     paid_lesson = models.ForeignKey('lms.Lesson', on_delete=models.SET_NULL, verbose_name='Урок', null=True, blank=True)
     payment_method = models.CharField(choices=payment_method_choices.choices,
                                       verbose_name='Способ оплаты')
+    payment_link = models.URLField(verbose_name='Ссылка на оплату', null=True, blank=True, max_length=400)
+    payment_id = models.CharField(max_length=255, verbose_name='ID платежа', null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Оплата'
+        verbose_name_plural = 'Платежи'
+
+    def __str__(self):
+        return self.payment_id
