@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 from lms.models import Course, Lesson, Subscription
 from lms.paginators import CoursePaginator, LessonPaginator
 from lms.serializers import CourseSerializer, LessonSerializer, SubscriptionSerializer
+from lms.tasks import send_mail_about_update
 from users.permissions import IsModerator, IsOwner
 
 
@@ -30,13 +31,13 @@ class CourseViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
-    def get_queryset(self):
-        if self.action == 'list':
-            if self.request.user.groups.filter(name="Модератор").exists():
-                return self.queryset.all()
-        if self.action == 'retrieve' and self.request.user.groups.filter(name="Модератор").exists():
-            return self.queryset.all()
-        return self.queryset.filter(owner=self.request.user)
+    # def get_queryset(self):
+    #     if self.action == 'list':
+    #         if self.request.user.groups.filter(name="Модератор").exists():
+    #             return self.queryset.all()
+    #     if self.action == 'retrieve' and self.request.user.groups.filter(name="Модератор").exists():
+    #         return self.queryset.all()
+    #     return self.queryset.filter(owner=self.request.user)
 
 
 class CreateLessonApiView(generics.CreateAPIView):
@@ -65,7 +66,14 @@ class DetailLessonApiView(generics.RetrieveAPIView):
 class UpdateLessonApiView(generics.UpdateAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
-    permission_classes = [IsAuthenticated, ~IsModerator, IsOwner]
+    # permission_classes = [IsAuthenticated, ~IsModerator, IsOwner]
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        subscriptions = Subscription.objects.filter(course=instance.course)
+        for subscription in subscriptions:
+            if self.request.user.id == subscription.user.id:
+                send_mail_about_update.delay(course_name=instance.course.title)
 
 
 class DeleteLessonApiView(generics.DestroyAPIView):
@@ -87,6 +95,7 @@ class SubscriptionApiView(APIView):
             message = 'Вы отписались от курса'
             status = HTTP_204_NO_CONTENT
         else:
+            subs_item.save()
             message = 'Вы подписались на курс'
             status = HTTP_201_CREATED
         return Response({'message': message}, status=status)

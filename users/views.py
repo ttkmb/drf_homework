@@ -6,6 +6,7 @@ from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from lms.models import Course
+from lms.tasks import check_monthly_authorization
 from users.models import Payments
 from users.permissions import IsOwnerProfile
 from users.serializers import UserSerializer, PaymentSerializer, ProductSerializer
@@ -20,6 +21,7 @@ class UsersCreateView(generics.CreateAPIView):
     def perform_create(self, serializer):
         user = serializer.save()
         user.set_password(user.password)
+        # check_monthly_authorization()
         user.save()
 
 

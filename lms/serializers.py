@@ -24,11 +24,11 @@ class CourseSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'owner', 'description', 'lesson_count', 'lessons', 'subscription']
 
     def get_lesson_count(self, obj):
-        return obj.lesson_set.count()
+        return obj.course.count()
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        lessons = instance.lesson_set.all()
+        lessons = instance.course.all()
         representation['lessons'] = LessonSerializer(lessons, many=True).data
         return representation
 
